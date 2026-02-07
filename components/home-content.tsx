@@ -95,7 +95,14 @@ export function HomeContent() {
 
       const res = await fetch(url)
       const data = await res.json()
-      setWebsites(data)
+      
+      // 确保返回的是数组
+      if (Array.isArray(data)) {
+        setWebsites(data)
+      } else {
+        console.error("Websites API returned non-array:", data)
+        setWebsites([])
+      }
     } catch (error) {
       console.error("Failed to fetch websites:", error)
     } finally {
@@ -132,9 +139,9 @@ export function HomeContent() {
   }
 
   // 过滤掉没有网站的分类
-  const validCategories = categories.filter(cat => 
-    cat._count?.websites && cat._count.websites > 0
-  )
+  const validCategories = Array.isArray(categories) 
+    ? categories.filter(cat => cat._count?.websites && cat._count.websites > 0)
+    : []
 
   return (
     <div className="min-h-screen gradient-bg">

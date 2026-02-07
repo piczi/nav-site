@@ -30,8 +30,12 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
     const cached = sessionStorage.getItem('nav_categories')
     if (cached) {
       try {
-        setCategories(JSON.parse(cached))
-        setLoading(false)
+        const parsed = JSON.parse(cached)
+        // 确保缓存的是数组
+        if (Array.isArray(parsed)) {
+          setCategories(parsed)
+          setLoading(false)
+        }
       } catch {
         // 解析失败，重新获取
       }
@@ -44,11 +48,19 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch("/api/categories")
       const data = await res.json()
-      setCategories(data)
-      // 缓存到 sessionStorage
-      sessionStorage.setItem('nav_categories', JSON.stringify(data))
+      
+      // 确保返回的是数组
+      if (Array.isArray(data)) {
+        setCategories(data)
+        // 缓存到 sessionStorage
+        sessionStorage.setItem('nav_categories', JSON.stringify(data))
+      } else {
+        console.error("Categories API returned non-array:", data)
+        setCategories([])
+      }
     } catch (error) {
       console.error("Failed to fetch categories:", error)
+      setCategories([])
     } finally {
       setLoading(false)
     }

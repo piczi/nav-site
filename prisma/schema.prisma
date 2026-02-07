@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 // 网站分类
@@ -39,6 +39,11 @@ model Website {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   clicks      Click[]
+
+  @@index([categoryId])
+  @@index([isShow])
+  @@index([isFeatured])
+  @@index([clickCount])
 }
 
 // 点击记录（用于统计）
@@ -50,6 +55,9 @@ model Click {
   userAgent   String?  // 浏览器信息
   referrer    String?  // 来源页面
   createdAt   DateTime @default(now())
+
+  @@index([websiteId])
+  @@index([createdAt])
 }
 
 // 管理员账户（简单密码保护）

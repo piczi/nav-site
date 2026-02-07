@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { checkSecurityMiddleware } from "@/lib/security-middleware"
 
+export const dynamic = 'force-dynamic'
+
 const SESSION_COOKIE = "admin_session"
 
 export async function GET(request: Request) {

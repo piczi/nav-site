@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// 网站分类
+model Category {
+  id          String    @id @default(uuid())
+  name        String    // 分类名称
+  slug        String    @unique // URL标识
+  icon        String?   // 图标
+  color       String?   // 主题色
+  description String?   // 描述
+  sort        Int       @default(0) // 排序
+  isShow      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  websites    Website[]
+}
+
+// 网站信息
+model Website {
+  id          String    @id @default(uuid())
+  title       String    // 网站名称
+  url         String    // 网站链接
+  description String?   // 描述
+  icon        String?   // 图标
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  isShow      Boolean   @default(true)
+  isFeatured  Boolean   @default(false) // 是否推荐
+  sort        Int       @default(0)
+  clickCount  Int       @default(0) // 点击统计
+  tags        String?   // 标签（逗号分隔）
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  clicks      Click[]
+}
+
+// 点击记录（用于统计）
+model Click {
+  id          String   @id @default(uuid())
+  websiteId   String
+  website     Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  ip          String?  // IP地址
+  userAgent   String?  // 浏览器信息
+  referrer    String?  // 来源页面
+  createdAt   DateTime @default(now())
+}
+
+// 管理员账户（简单密码保护）
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String   // 加密存储
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

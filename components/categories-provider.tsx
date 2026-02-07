@@ -26,34 +26,18 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // 检查 sessionStorage 中是否有缓存的分类数据
-    const cached = sessionStorage.getItem('nav_categories')
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached)
-        // 确保缓存的是数组
-        if (Array.isArray(parsed)) {
-          setCategories(parsed)
-          setLoading(false)
-        }
-      } catch {
-        // 解析失败，重新获取
-      }
-    }
-
     fetchCategories()
   }, [])
 
   async function fetchCategories() {
     try {
-      const res = await fetch("/api/categories")
+      // 添加时间戳防止缓存
+      const res = await fetch(`/api/categories?t=${Date.now()}`)
       const data = await res.json()
       
       // 确保返回的是数组
       if (Array.isArray(data)) {
         setCategories(data)
-        // 缓存到 sessionStorage
-        sessionStorage.setItem('nav_categories', JSON.stringify(data))
       } else {
         console.error("Categories API returned non-array:", data)
         setCategories([])

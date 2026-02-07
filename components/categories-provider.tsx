@@ -17,6 +17,7 @@ export interface Category {
 interface CategoriesContextType {
   categories: Category[]
   loading: boolean
+  refresh: () => Promise<void>
 }
 
 const CategoriesContext = createContext<CategoriesContextType | undefined>(undefined)
@@ -51,7 +52,7 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <CategoriesContext.Provider value={{ categories, loading }}>
+    <CategoriesContext.Provider value={{ categories, loading, refresh: fetchCategories }}>
       {children}
     </CategoriesContext.Provider>
   )

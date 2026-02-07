@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { WebsiteIcon } from "./website-icon"
+import { RefreshCw } from "lucide-react"
 import { useCategories } from "./categories-provider"
 import Link from "next/link"
 
@@ -38,7 +39,7 @@ interface Website {
 }
 
 export function HomeContent() {
-  const { categories, loading: categoriesLoading } = useCategories()
+  const { categories, loading: categoriesLoading, refresh: refreshCategories } = useCategories()
   
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -73,6 +74,9 @@ export function HomeContent() {
       let url = "/api/websites"
       const params = new URLSearchParams()
       
+      // 添加时间戳防止缓存
+      params.append("_t", Date.now().toString())
+      
       if (activeCategory) {
         params.append("category", activeCategory)
       }
@@ -89,11 +93,15 @@ export function HomeContent() {
         params.append("sortBy", filters.sortBy)
       }
       
-      if (params.toString()) {
-        url += `?${params.toString()}`
-      }
+      url += `?${params.toString()}`
 
-      const res = await fetch(url)
+      const res = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       const data = await res.json()
       
       // 确保返回的是数组
@@ -267,11 +275,25 @@ export function HomeContent() {
             )}
           </p>
           
-          {websites.length > 0 && (
-            <Link href="/search" className="text-sm text-primary hover:underline">
-              高级搜索 →
-            </Link>
-          )}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                refreshCategories()
+                fetchWebsites()
+              }}
+              disabled={loading || categoriesLoading}
+              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3 w-3 ${(loading || categoriesLoading) ? 'animate-spin' : ''}`} />
+              刷新
+            </button>
+            
+            {websites.length > 0 && (
+              <Link href="/search" className="text-sm text-primary hover:underline">
+                高级搜索 →
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* 网站列表 */}

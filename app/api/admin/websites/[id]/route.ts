@@ -100,15 +100,36 @@ export async function DELETE(
 
     const { id } = params
 
+    // Check if website exists
+    const website = await prisma.website.findUnique({
+      where: { id },
+    })
+
+    if (!website) {
+      return NextResponse.json(
+        { error: "网站不存在" },
+        { status: 404 }
+      )
+    }
+
     await prisma.website.delete({
       where: { id },
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting website:", error)
+    
+    // Detailed error message
+    let errorMessage = "删除网站失败"
+    if (error.code === 'P2025') {
+      errorMessage = "网站不存在或已被删除"
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
     return NextResponse.json(
-      { error: "Failed to delete website" },
+      { error: errorMessage },
       { status: 500 }
     )
   }

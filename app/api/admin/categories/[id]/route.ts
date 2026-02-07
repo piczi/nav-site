@@ -95,15 +95,51 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // 检查分类是否存在
+    const category = await prisma.category.findUnique({
+      where: { id: params.id },
+      include: {
+        _count: {
+          select: { websites: true }
+        }
+      }
+    })
+
+    if (!category) {
+      return NextResponse.json(
+        { error: "分类不存在" },
+        { status: 404 }
+      )
+    }
+
+    // 检查分类下是否有网站
+    if (category._count.websites > 0) {
+      return NextResponse.json(
+        { error: `该分类下有 ${category._count.websites} 个网站，请先删除网站或将其移动到其他分类` },
+        { status: 400 }
+      )
+    }
+
     await prisma.category.delete({
       where: { id: params.id },
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting category:", error)
+    
+    // 详细的错误信息
+    let errorMessage = "删除分类失败"
+    if (error.code === 'P2003') {
+      errorMessage = "该分类下还有网站，无法删除"
+    } else if (error.code === 'P2025') {
+      errorMessage = "分类不存在"
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
     return NextResponse.json(
-      { error: "Failed to delete category" },
+      { error: errorMessage },
       { status: 500 }
     )
   }

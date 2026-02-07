@@ -71,7 +71,9 @@ export default function WebsitesPage() {
 
   async function loadWebsites() {
     try {
-      const res = await fetch("/api/websites")
+      // 使用 admin API 并添加时间戳防止缓存
+      const res = await fetch(`/api/admin/websites?t=${Date.now()}`)
+      if (!res.ok) throw new Error("加载失败")
       const data = await res.json()
       setWebsites(data)
     } catch (error) {
@@ -90,11 +92,15 @@ export default function WebsitesPage() {
         method: "DELETE"
       })
 
-      if (!res.ok) throw new Error("删除失败")
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "删除失败")
+      }
 
-      setWebsites(websites.filter(w => w.id !== id))
-    } catch (error) {
-      setError("删除失败")
+      // 重新加载数据而不是本地过滤
+      await loadWebsites()
+    } catch (error: any) {
+      setError(error.message || "删除失败")
     }
   }
 
@@ -106,13 +112,15 @@ export default function WebsitesPage() {
         body: JSON.stringify({ isFeatured: !currentStatus })
       })
 
-      if (!res.ok) throw new Error("更新失败")
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "更新失败")
+      }
 
-      setWebsites(websites.map(w => 
-        w.id === id ? { ...w, isFeatured: !currentStatus } : w
-      ))
-    } catch (error) {
-      setError("更新失败")
+      // 重新加载数据
+      await loadWebsites()
+    } catch (error: any) {
+      setError(error.message || "更新失败")
     }
   }
 

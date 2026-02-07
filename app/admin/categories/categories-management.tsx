@@ -66,7 +66,9 @@ export function CategoriesManagement() {
 
   async function loadCategories() {
     try {
-      const res = await fetch("/api/categories")
+      // 使用 admin API 并添加时间戳防止缓存
+      const res = await fetch(`/api/admin/categories?t=${Date.now()}`)
+      if (!res.ok) throw new Error("加载失败")
       const data = await res.json()
       setCategories(data)
     } catch (error) {
@@ -85,11 +87,15 @@ export function CategoriesManagement() {
         method: "DELETE"
       })
 
-      if (!res.ok) throw new Error("删除失败")
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "删除失败")
+      }
 
-      setCategories(categories.filter(c => c.id !== id))
-    } catch (error) {
-      setError("删除失败")
+      // 重新加载数据而不是本地过滤
+      await loadCategories()
+    } catch (error: any) {
+      setError(error.message || "删除失败")
     }
   }
 

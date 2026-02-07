@@ -67,7 +67,7 @@ export default function NewWebsitePage() {
 
   async function loadCategories() {
     try {
-      const res = await fetch("/api/categories")
+      const res = await fetch(`/api/admin/categories?t=${Date.now()}`)
       const data = await res.json()
       setCategories(data)
     } catch (error) {

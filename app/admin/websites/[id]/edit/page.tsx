@@ -70,7 +70,7 @@ export default function EditWebsitePage({ params }: { params: { id: string } }) 
     try {
       const [websiteRes, categoriesRes] = await Promise.all([
         fetch(`/api/admin/websites/${params.id}`),
-        fetch("/api/categories")
+        fetch(`/api/admin/categories?t=${Date.now()}`)
       ])
 
       if (!websiteRes.ok) {

@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { checkSecurityMiddleware } from "@/lib/security-middleware"
-
-const SESSION_COOKIE = "admin_session"
+import { destroySession } from "@/lib/session"
 
 export async function POST(request: Request) {
   return checkSecurityMiddleware(request, async () => {
     try {
       // Clear the session cookie
-      cookies().delete(SESSION_COOKIE)
+      destroySession()
       
       return NextResponse.json({ success: true })
     } catch (error) {

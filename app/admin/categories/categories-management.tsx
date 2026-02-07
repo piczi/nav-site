@@ -14,8 +14,10 @@ import {
   Trash2,
   LogOut,
   ExternalLink,
-  ArrowUpDown
+  ArrowUpDown,
+  Upload
 } from "lucide-react"
+import { ImportModal } from "@/components/admin/import-modal"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -41,6 +43,7 @@ export function CategoriesManagement() {
   const [error, setError] = useState("")
   const [categories, setCategories] = useState<Category[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -213,6 +216,10 @@ export function CategoriesManagement() {
             <h1 className="text-xl font-bold">分类管理</h1>
           </div>
           <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              批量导入
+            </Button>
             <Link href="/admin/categories/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -351,6 +358,17 @@ export function CategoriesManagement() {
           )}
         </div>
       </main>
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        type="categories"
+        title="分类"
+        onSuccess={() => {
+          loadCategories()
+        }}
+      />
     </div>
   )
 }

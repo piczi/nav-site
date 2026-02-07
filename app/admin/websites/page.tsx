@@ -17,8 +17,10 @@ import {
   Trash2,
   Star,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Upload
 } from "lucide-react"
+import { ImportModal } from "@/components/admin/import-modal"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -46,6 +48,7 @@ export default function WebsitesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -212,6 +215,10 @@ export default function WebsitesPage() {
             <h1 className="text-xl font-bold">网站管理</h1>
           </div>
           <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              批量导入
+            </Button>
             <Link href="/admin/websites/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -380,6 +387,17 @@ export default function WebsitesPage() {
           )}
         </div>
       </main>
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        type="websites"
+        title="网站"
+        onSuccess={() => {
+          loadWebsites()
+        }}
+      />
     </div>
   )
 }

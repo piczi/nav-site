@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { isIPBanned, recordLoginFailure, checkRateLimit } from "@/lib/security"
+import { createSession } from "@/lib/session"
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin"
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"
-const SESSION_COOKIE = "admin_session"
-
-// Simple session storage (in production, use Redis or database)
-const sessions = new Set<string>()
 
 function getClientIP(request: Request): string {
   // 在 Vercel 环境中，真实 IP 在 x-forwarded-for 头中
@@ -61,17 +57,7 @@ export async function POST(request: Request) {
     }
 
     // Create session
-    const sessionId = generateSessionId()
-    sessions.add(sessionId)
-
-    // Set cookie
-    cookies().set(SESSION_COOKIE, sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-    })
+    createSession()
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -81,9 +67,4 @@ export async function POST(request: Request) {
       { status: 500 }
     )
   }
-}
-
-function generateSessionId(): string {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15)
 }

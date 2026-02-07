@@ -5,7 +5,8 @@ const SECURITY_CONFIG = {
   // 封禁时间（分钟）
   BAN_DURATION: 30,
   // 请求频率限制（每分钟最大请求数）
-  RATE_LIMIT_PER_MINUTE: 10,
+  // 本地开发环境禁用频率限制以避免 429 错误
+  RATE_LIMIT_PER_MINUTE: process.env.NODE_ENV === 'production' ? 10 : 1000,
 }
 
 // 内存存储（生产环境应使用 Redis）

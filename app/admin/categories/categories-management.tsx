@@ -46,26 +46,8 @@ export function CategoriesManagement() {
   const [importModalOpen, setImportModalOpen] = useState(false)
 
   useEffect(() => {
-    checkAuth()
     loadCategories()
   }, [])
-
-  async function checkAuth() {
-    try {
-      const res = await fetch("/api/admin/check-auth")
-      if (!res.ok) {
-        router.push("/admin")
-        return
-      }
-      const data = await res.json()
-      if (!data.authenticated) {
-        router.push("/admin")
-      }
-    } catch (error) {
-      console.error("Auth check failed:", error)
-      router.push("/admin")
-    }
-  }
 
   async function loadCategories() {
     try {

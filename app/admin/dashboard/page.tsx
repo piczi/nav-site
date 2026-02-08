@@ -15,13 +15,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-interface DashboardStats {
-  totalWebsites: number
-  totalCategories: number
-  totalClicks: number
-  featuredWebsites: number
-}
+import { fetchDashboardStats, logoutAdmin, UnauthorizedError, type DashboardStats } from "./dashboard.service"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -29,44 +23,22 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
 
   useEffect(() => {
-    checkAuth()
-    loadDashboardData()
+    const controller = new AbortController()
+    loadDashboardData(controller.signal)
+    return () => {
+      controller.abort()
+    }
   }, [])
 
-  async function checkAuth() {
+  async function loadDashboardData(signal?: AbortSignal) {
     try {
-      const res = await fetch("/api/admin/check-auth")
-      if (!res.ok) {
+      const nextStats = await fetchDashboardStats(signal)
+      setStats(nextStats)
+    } catch (error: unknown) {
+      if (error instanceof UnauthorizedError) {
         router.push("/admin")
         return
       }
-      const data = await res.json()
-      if (!data.authenticated) {
-        router.push("/admin")
-      }
-    } catch (error) {
-      router.push("/admin")
-    }
-  }
-
-  async function loadDashboardData() {
-    try {
-      const websitesRes = await fetch("/api/websites")
-      const websites = await websitesRes.json()
-
-      const categoriesRes = await fetch("/api/categories")
-      const categories = await categoriesRes.json()
-
-      const totalClicks = websites.reduce((sum: number, w: any) => sum + (w.clickCount || 0), 0)
-      const featuredCount = websites.filter((w: any) => w.isFeatured).length
-
-      setStats({
-        totalWebsites: websites.length,
-        totalCategories: categories.length,
-        totalClicks,
-        featuredWebsites: featuredCount
-      })
-    } catch (error) {
       console.error("Failed to load dashboard data:", error)
     } finally {
       setLoading(false)
@@ -74,7 +46,12 @@ export default function DashboardPage() {
   }
 
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" })
+    try {
+      await logoutAdmin()
+    } catch (error) {
+      // 保持和原有体验一致：无论登出接口是否成功都回到登录页
+      console.error("Logout failed:", error)
+    }
     router.push("/admin")
   }
 

@@ -46,25 +46,8 @@ export default function EditWebsitePage({ params }: { params: { id: string } }) 
   const [isShow, setIsShow] = useState(true)
 
   useEffect(() => {
-    checkAuth()
     loadData()
   }, [])
-
-  async function checkAuth() {
-    try {
-      const res = await fetch("/api/admin/check-auth")
-      if (!res.ok) {
-        router.push("/admin")
-        return
-      }
-      const data = await res.json()
-      if (!data.authenticated) {
-        router.push("/admin")
-      }
-    } catch (error) {
-      router.push("/admin")
-    }
-  }
 
   async function loadData() {
     try {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
+import { fetchWebsiteFaviconAsync } from "@/lib/background-tasks"
 
 // Middleware to check admin auth
 async function checkAuth() {
@@ -59,21 +60,33 @@ export async function POST(request: Request) {
       )
     }
 
-    const body = await request.json()
-    const { 
-      title, 
-      url, 
-      description, 
-      icon, 
-      categoryId,
-      tags,
-      isFeatured,
-      isShow,
-      sort 
-    } = body
+    const body = (await request.json()) as Record<string, unknown>
+
+    const title = body.title
+    const url = body.url
+    const description = body.description
+    const categoryId = body.categoryId
+    const tags = body.tags
+    const isFeatured = body.isFeatured
+    const isShow = body.isShow
+    const sort = body.sort
+
+    const iconProvided = Object.prototype.hasOwnProperty.call(body, "icon")
+    const normalizedIcon: string | null | undefined = (() => {
+      if (!iconProvided) return undefined
+      const raw = body.icon
+      if (raw === null) return null
+      if (typeof raw !== "string") return undefined
+      const trimmed = raw.trim()
+      return trimmed.length > 0 ? trimmed : null
+    })()
+
+    if (iconProvided && normalizedIcon === undefined) {
+      return NextResponse.json({ error: "icon 字段格式不正确" }, { status: 400 })
+    }
 
     // Validate required fields
-    if (!title || !url || !categoryId) {
+    if (typeof title !== "string" || typeof url !== "string" || typeof categoryId !== "string") {
       return NextResponse.json(
         { error: "名称、网址和分类不能为空" },
         { status: 400 }
@@ -94,16 +107,29 @@ export async function POST(request: Request) {
       data: {
         title,
         url,
-        description,
-        icon,
+        description: typeof description === "string" ? description : undefined,
         categoryId,
-        tags: Array.isArray(tags) ? tags.join(',') : tags || '',
-        isFeatured: isFeatured || false,
+        ...(iconProvided ? { icon: normalizedIcon } : {}),
+        tags: Array.isArray(tags) ? tags.join(",") : typeof tags === "string" ? tags : "",
+        isFeatured: typeof isFeatured === "boolean" ? isFeatured : false,
         isShow: isShow !== false,
-        sort: sort || 0,
+        sort: typeof sort === "number" ? sort : 0,
         clickCount: 0,
       },
     })
+
+    // 如果没有提供 icon，异步获取 favicon
+    const shouldFetchFavicon = !iconProvided || normalizedIcon === null
+    if (shouldFetchFavicon) {
+      // 使用 setImmediate 或 setTimeout 来确保不阻塞主请求
+      setTimeout(async () => {
+        try {
+          await fetchWebsiteFaviconAsync(website.id, url)
+        } catch (error) {
+          console.error("Background favicon fetch failed:", error)
+        }
+      }, 0)
+    }
 
     return NextResponse.json(website)
   } catch (error) {

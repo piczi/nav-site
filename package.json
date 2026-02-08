@@ -12,7 +12,9 @@
     "db:push": "dotenv -e .env.local -- prisma db push",
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:studio": "dotenv -e .env.local -- prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "favicon:sync": "node scripts/schedule-favicon-sync.js",
+    "favicon:sync:manual": "tsx scripts/sync-favicons.ts"
   },
   "dependencies": {
     "@planetscale/database": "^1.19.0",

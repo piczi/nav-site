@@ -10,7 +10,8 @@ import {
   FolderTree, 
   LogOut,
   ExternalLink,
-  Loader2
+  Loader2,
+  BarChart3
 } from "lucide-react"
 import { adminLogout, checkAdminAuthenticated } from "./admin-auth.service"
 
@@ -93,7 +94,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-4">
+           <nav className="flex-1 space-y-1 p-4">
             <Link href="/admin/dashboard">
               <Button 
                 variant={pathname === "/admin/dashboard" ? "secondary" : "ghost"} 
@@ -119,6 +120,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               >
                 <FolderTree className="mr-2 h-4 w-4" />
                 分类管理
+              </Button>
+            </Link>
+            <Link href="/admin/favicon-stats">
+              <Button 
+                variant={pathname.startsWith("/admin/favicon-stats") ? "secondary" : "ghost"} 
+                className="w-full justify-start"
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                图标统计
               </Button>
             </Link>
           </nav>

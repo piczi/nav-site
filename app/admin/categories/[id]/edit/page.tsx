@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Loader2 } from "lucide-react"
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 
-export default function EditCategoryPage({ params }: { params: { id: string } }) {
+export default function EditCategoryPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -24,13 +24,16 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
   const [icon, setIcon] = useState("")
   const [isShow, setIsShow] = useState(true)
 
+  // 解包 params Promise
+  const { id } = use(params)
+
   useEffect(() => {
     loadData()
-  }, [])
+  }, [id])
 
   async function loadData() {
     try {
-      const res = await fetch(`/api/admin/categories/${params.id}`)
+      const res = await fetch(`/api/admin/categories/${id}`)
       if (!res.ok) {
         throw new Error("分类不存在")
       }
@@ -60,7 +63,7 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
         throw new Error("请填写名称和标识")
       }
 
-      const res = await fetch(`/api/admin/categories/${params.id}`, {
+      const res = await fetch(`/api/admin/categories/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

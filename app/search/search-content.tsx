@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Navbar } from "@/components/navbar"
+import { WebsiteIcon } from "@/components/website-icon"
 
 interface Website {
   id: string
@@ -201,9 +202,9 @@ export function SearchContent({ initialQuery }: { initialQuery: string }) {
                   >
                     <div className="p-5">
                       <div className="flex items-start gap-3 mb-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-2xl">
-                          {website.icon || website.title.charAt(0)}
-                        </div>
+                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                           <WebsiteIcon url={website.url} title={website.title} icon={website.icon} size="xl" />
+                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-bold text-base group-hover:text-primary transition-colors truncate">
                             {website.title}
@@ -238,9 +239,9 @@ export function SearchContent({ initialQuery }: { initialQuery: string }) {
                     className="group flex items-center gap-4 p-4 cursor-pointer hover:shadow-md transition-shadow"
                     onClick={() => handleWebsiteClick(website.id, website.url)}
                   >
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-xl flex-shrink-0">
-                      {website.icon || website.title.charAt(0)}
-                    </div>
+                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0">
+                       <WebsiteIcon url={website.url} title={website.title} icon={website.icon} size="xl" />
+                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold group-hover:text-primary transition-colors">
                         {website.title}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Loader2, ExternalLink, LogOut, LayoutDashboard, Globe, FolderTree } from "lucide-react"
@@ -29,7 +29,7 @@ interface Website {
   isShow: boolean
 }
 
-export default function EditWebsitePage({ params }: { params: { id: string } }) {
+export default function EditWebsitePage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -45,14 +45,17 @@ export default function EditWebsitePage({ params }: { params: { id: string } }) 
   const [isFeatured, setIsFeatured] = useState(false)
   const [isShow, setIsShow] = useState(true)
 
+  // 解包 params Promise
+  const { id } = use(params)
+
   useEffect(() => {
     loadData()
-  }, [])
+  }, [id])
 
   async function loadData() {
     try {
       const [websiteRes, categoriesRes] = await Promise.all([
-        fetch(`/api/admin/websites/${params.id}`),
+        fetch(`/api/admin/websites/${id}`),
         fetch(`/api/admin/categories?t=${Date.now()}`)
       ])
 
@@ -96,7 +99,7 @@ export default function EditWebsitePage({ params }: { params: { id: string } }) 
         throw new Error("网址格式不正确")
       }
 
-      const res = await fetch(`/api/admin/websites/${params.id}`, {
+      const res = await fetch(`/api/admin/websites/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

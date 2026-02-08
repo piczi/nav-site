@@ -15,6 +15,7 @@ import {
   Upload
 } from "lucide-react"
 import { ImportModal } from "@/components/admin/import-modal"
+import { WebsiteIcon } from "@/components/website-icon"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
@@ -179,8 +180,8 @@ export default function WebsitesPage() {
                     <tr key={website.id} className="hover:bg-muted/50">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-lg">
-                            {website.icon || website.title.charAt(0)}
+                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <WebsiteIcon url={website.url} title={website.title} icon={website.icon} size="lg" />
                           </div>
                           <div>
                             <h4 className="font-medium">{website.title}</h4>

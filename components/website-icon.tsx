@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface WebsiteIconProps {
   url: string
@@ -17,28 +17,33 @@ const sizeClasses = {
   xl: "w-12 h-12 text-lg",
 }
 
+// 构建 favicon URL
+const getFaviconUrl = (url: string): string => {
+  return `/api/favicon?url=${encodeURIComponent(url)}&t=${Math.floor(Date.now() / 3600000)}` // 每小时刷新一次
+}
+
 export function WebsiteIcon({ url, title, icon, size = "md", className = "" }: WebsiteIconProps) {
-  const [error, setError] = useState(false)
-  
-  // 如果提供了 icon 且没有错误，显示提供的 icon
-  if (icon && !error) {
-    return (
-      <img
-        src={icon}
-        alt={title}
-        className={`${sizeClasses[size]} object-contain ${className}`}
-        onError={() => setError(true)}
-      />
-    )
+  const hasIcon = typeof icon === "string" && icon.trim().length > 0
+  const proxyUrl = getFaviconUrl(url)
+
+  type IconSource = "icon" | "proxy" | "fallback"
+  const [source, setSource] = useState<IconSource>(hasIcon ? "icon" : "proxy")
+
+  useEffect(() => {
+    setSource(hasIcon ? "icon" : "proxy")
+  }, [hasIcon, url])
+
+  const src = source === "icon" ? icon! : proxyUrl
+
+  const handleError = () => {
+    setSource((prev) => {
+      if (prev === "icon") return "proxy"
+      if (prev === "proxy") return "fallback"
+      return "fallback"
+    })
   }
-  
-  // 尝试从 URL 获取域名
-  let domain = ""
-  try {
-    const urlObj = new URL(url)
-    domain = urlObj.hostname.replace(/^www\./, "")
-  } catch {
-    // URL 解析失败，显示首字母
+
+  if (source === "fallback") {
     return (
       <span className={`${sizeClasses[size]} flex items-center justify-center font-bold text-gradient ${className}`}>
         {title.charAt(0).toUpperCase()}
@@ -46,24 +51,13 @@ export function WebsiteIcon({ url, title, icon, size = "md", className = "" }: W
     )
   }
   
-  // 使用 Google Favicon API 获取图标
-  const googleFaviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
-  
-  if (!error) {
-    return (
-      <img
-        src={googleFaviconUrl}
-        alt={title}
-        className={`${sizeClasses[size]} object-contain ${className}`}
-        onError={() => setError(true)}
-      />
-    )
-  }
-  
-  // 获取失败，显示首字母
   return (
-    <span className={`${sizeClasses[size]} flex items-center justify-center font-bold text-gradient ${className}`}>
-      {title.charAt(0).toUpperCase()}
-    </span>
+    <img
+      key={src}
+      src={src}
+      alt={title}
+      className={`${sizeClasses[size]} object-contain ${className}`}
+      onError={handleError}
+    />
   )
 }

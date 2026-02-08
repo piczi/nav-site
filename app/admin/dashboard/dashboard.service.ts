@@ -33,19 +33,17 @@ function getNumberField(obj: JsonObject, key: string): number | undefined {
   return typeof v === "number" && Number.isFinite(v) ? v : undefined
 }
 
-export async function fetchDashboardStats(signal?: AbortSignal): Promise<DashboardStats> {
+export async function fetchDashboardStats(): Promise<DashboardStats> {
   const [websitesRes, categoriesRes] = await Promise.all([
     fetch("/api/admin/websites", {
       method: "GET",
-      credentials: "include",
+      // 移除 credentials: "include"
       cache: "no-store",
-      signal,
     }),
     fetch("/api/admin/categories", {
       method: "GET",
-      credentials: "include",
+      // 移除 credentials: "include"
       cache: "no-store",
-      signal,
     }),
   ])
 
@@ -84,12 +82,11 @@ export async function fetchDashboardStats(signal?: AbortSignal): Promise<Dashboa
   }
 }
 
-export async function logoutAdmin(signal?: AbortSignal): Promise<void> {
+export async function logoutAdmin(): Promise<void> {
   const res = await fetch("/api/admin/logout", {
     method: "POST",
-    credentials: "include",
+    // 移除 credentials: "include"
     cache: "no-store",
-    signal,
   })
   // 即便后端返回 401/500，这里也不阻止前端跳转到登录页
   if (!res.ok && res.status !== 401) {

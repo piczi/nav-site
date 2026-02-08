@@ -7,14 +7,16 @@ export const metadata: Metadata = {
   description: "按分类浏览优质网站",
 }
 
-export default function CategoryPage({
+export default async function CategoryPage({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }) {
-  if (!params.slug) {
+  const { slug } = await params
+  
+  if (!slug) {
     notFound()
   }
 
-  return <CategoryContent slug={params.slug} />
+  return <CategoryContent slug={slug} />
 }

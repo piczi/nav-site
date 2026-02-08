@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Loader2, ExternalLink, LogOut, LayoutDashboard, Globe, FolderTree } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -25,25 +25,8 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
   const [isShow, setIsShow] = useState(true)
 
   useEffect(() => {
-    checkAuth()
     loadData()
   }, [])
-
-  async function checkAuth() {
-    try {
-      const res = await fetch("/api/admin/check-auth")
-      if (!res.ok) {
-        router.push("/admin")
-        return
-      }
-      const data = await res.json()
-      if (!data.authenticated) {
-        router.push("/admin")
-      }
-    } catch (error) {
-      router.push("/admin")
-    }
-  }
 
   async function loadData() {
     try {
@@ -106,14 +89,14 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       {/* Header */}
       <header className="sticky top-0 z-30 h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6 flex items-center">
         <Link href="/admin/categories">

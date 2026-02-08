@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { isIPBanned, recordLoginFailure, checkRateLimit } from "@/lib/security"
-import { createSession } from "@/lib/session"
+import { createSessionResponse } from "@/lib/session"
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin"
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"
@@ -57,9 +57,7 @@ export async function POST(request: Request) {
     }
 
     // Create session
-    createSession()
-
-    return NextResponse.json({ success: true })
+    return createSessionResponse({ success: true })
   } catch (error) {
     console.error("Login error:", error)
     return NextResponse.json(

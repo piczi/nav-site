@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { headers } from "next/headers"
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const websiteId = params.id
-    const headersList = headers()
+    const { id: websiteId } = await context.params
+    const headersList = await headers()
     const userAgent = headersList.get("user-agent") || ""
     const referrer = headersList.get("referer") || ""
     

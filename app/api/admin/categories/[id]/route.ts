@@ -1,15 +1,34 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 
 async function checkAuth() {
-  const sessionCookie = cookies().get("admin_session")
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get("admin_session")
   return !!sessionCookie?.value
 }
 
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
+
+function getErrorCode(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null) return undefined
+  if (!("code" in error)) return undefined
+  const code = (error as Record<string, unknown>).code
+  return typeof code === "string" ? code : undefined
+}
+
+function getErrorMessage(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null) return undefined
+  if (!("message" in error)) return undefined
+  const message = (error as Record<string, unknown>).message
+  return typeof message === "string" ? message : undefined
+}
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: RouteContext
 ) {
   try {
     const isAuthenticated = await checkAuth()
@@ -17,8 +36,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await context.params
     const category = await prisma.category.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!category) {
@@ -33,8 +53,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
   try {
     const isAuthenticated = await checkAuth()
@@ -42,6 +62,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await context.params
     const body = await request.json()
     const { name, slug, description, color, icon, sort, isShow } = body
 
@@ -50,7 +71,7 @@ export async function PATCH(
       const existing = await prisma.category.findFirst({
         where: {
           slug,
-          id: { not: params.id },
+          id: { not: id },
         },
       })
 
@@ -63,7 +84,7 @@ export async function PATCH(
     }
 
     const category = await prisma.category.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         slug,
@@ -86,8 +107,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: RouteContext
 ) {
   try {
     const isAuthenticated = await checkAuth()
@@ -95,9 +116,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await context.params
     // 检查分类是否存在
     const category = await prisma.category.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         _count: {
           select: { websites: true }
@@ -121,21 +143,23 @@ export async function DELETE(
     }
 
     await prisma.category.delete({
-      where: { id: params.id },
+      where: { id },
     })
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting category:", error)
     
     // 详细的错误信息
     let errorMessage = "删除分类失败"
-    if (error.code === 'P2003') {
+    const errorCode = getErrorCode(error)
+    const errorMsg = getErrorMessage(error)
+    if (errorCode === "P2003") {
       errorMessage = "该分类下还有网站，无法删除"
-    } else if (error.code === 'P2025') {
+    } else if (errorCode === "P2025") {
       errorMessage = "分类不存在"
-    } else if (error.message) {
-      errorMessage = error.message
+    } else if (errorMsg) {
+      errorMessage = errorMsg
     }
     
     return NextResponse.json(

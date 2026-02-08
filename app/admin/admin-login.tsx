@@ -16,6 +16,12 @@ export function AdminLogin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  function getErrorMessage(err: unknown): string {
+    if (err instanceof Error) return err.message
+    if (typeof err === "string") return err
+    return "登录失败"
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError("")
@@ -34,9 +40,10 @@ export function AdminLogin() {
         throw new Error(data.error || "登录失败")
       }
 
-      router.push("/admin/dashboard")
-    } catch (err: any) {
-      setError(err.message)
+      // 登录成功后，先刷新页面确保 cookie 生效，再跳转
+      window.location.href = "/admin/dashboard"
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }

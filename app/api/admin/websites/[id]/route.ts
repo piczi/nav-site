@@ -1,19 +1,38 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 
 // Middleware to check admin auth
 async function checkAuth() {
-  const sessionCookie = cookies().get("admin_session")
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get("admin_session")
   if (!sessionCookie?.value) {
     return false
   }
   return true
 }
 
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
+
+function getErrorCode(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null) return undefined
+  if (!("code" in error)) return undefined
+  const code = (error as Record<string, unknown>).code
+  return typeof code === "string" ? code : undefined
+}
+
+function getErrorMessage(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null) return undefined
+  if (!("message" in error)) return undefined
+  const message = (error as Record<string, unknown>).message
+  return typeof message === "string" ? message : undefined
+}
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: RouteContext
 ) {
   try {
     const isAuthenticated = await checkAuth()
@@ -24,8 +43,9 @@ export async function GET(
       )
     }
 
+    const { id } = await context.params
     const website = await prisma.website.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!website) {
@@ -46,8 +66,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
   try {
     // Check auth
@@ -59,7 +79,7 @@ export async function PATCH(
       )
     }
 
-    const { id } = params
+    const { id } = await context.params
     const body = await request.json()
     const { tags, ...otherData } = body
 
@@ -85,8 +105,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: RouteContext
 ) {
   try {
     // Check auth
@@ -98,7 +118,7 @@ export async function DELETE(
       )
     }
 
-    const { id } = params
+    const { id } = await context.params
 
     // Check if website exists
     const website = await prisma.website.findUnique({
@@ -117,15 +137,17 @@ export async function DELETE(
     })
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting website:", error)
     
     // Detailed error message
     let errorMessage = "删除网站失败"
-    if (error.code === 'P2025') {
+    const errorCode = getErrorCode(error)
+    const errorMsg = getErrorMessage(error)
+    if (errorCode === "P2025") {
       errorMessage = "网站不存在或已被删除"
-    } else if (error.message) {
-      errorMessage = error.message
+    } else if (errorMsg) {
+      errorMessage = errorMsg
     }
     
     return NextResponse.json(

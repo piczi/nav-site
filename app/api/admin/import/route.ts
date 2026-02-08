@@ -5,7 +5,8 @@ import * as XLSX from "xlsx"
 
 // Middleware to check admin auth
 async function checkAuth() {
-  const sessionCookie = cookies().get("admin_session")
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get("admin_session")
   if (!sessionCookie?.value) {
     return false
   }

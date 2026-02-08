@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server"
 import { checkSecurityMiddleware } from "@/lib/security-middleware"
-import { destroySession } from "@/lib/session"
+import { destroySessionResponse } from "@/lib/session"
 
 export async function POST(request: Request) {
   return checkSecurityMiddleware(request, async () => {
     try {
       // Clear the session cookie
-      destroySession()
-      
-      return NextResponse.json({ success: true })
+      return destroySessionResponse({ success: true })
     } catch (error) {
       console.error("Logout error:", error)
       return NextResponse.json(

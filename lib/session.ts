@@ -1,4 +1,4 @@
-import { cookies } from "next/headers"
+import { NextResponse } from "next/server"
 
 const SESSION_COOKIE = "admin_session"
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
@@ -12,39 +12,45 @@ function generateSessionId(): string {
 }
 
 /**
- * 创建新会话
+ * 创建新会话 - 在 API 路由中使用
  */
-export function createSession(): string {
+export function createSessionResponse(responseData: any = {}) {
   const sessionId = generateSessionId()
   
-  cookies().set(SESSION_COOKIE, sessionId, {
+  const response = NextResponse.json(responseData)
+  response.cookies.set(SESSION_COOKIE, sessionId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax", // 改为 lax，允许跨站导航时发送 cookie
     maxAge: SESSION_MAX_AGE,
     path: "/",
   })
   
-  return sessionId
+  return response
 }
 
 /**
- * 验证会话是否有效
+ * 验证会话是否有效 - 在 API 路由中使用
  */
-export function verifySession(): boolean {
-  const sessionCookie = cookies().get(SESSION_COOKIE)
-  return !!sessionCookie?.value
+export function verifySession(request: Request): boolean {
+  const sessionCookie = request.headers.get('cookie')
+  if (!sessionCookie) return false
+  
+  const match = sessionCookie.match(new RegExp(`(^| )${SESSION_COOKIE}=([^;]+)`))
+  return !!match?.[2]
 }
 
 /**
- * 销毁会话
+ * 销毁会话 - 在 API 路由中使用
  */
-export function destroySession(): void {
-  cookies().set(SESSION_COOKIE, "", {
+export function destroySessionResponse(responseData: any = {}) {
+  const response = NextResponse.json(responseData)
+  response.cookies.set(SESSION_COOKIE, "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     maxAge: 0,
     path: "/",
   })
+  return response
 }

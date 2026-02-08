@@ -110,7 +110,7 @@ export function Navbar() {
             </Button>
 
             {/* Admin Link */}
-            <Link href="/admin">
+            <Link href="/admin/dashboard">
               <Button 
                 variant="outline" 
                 size="sm"

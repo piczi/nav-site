@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   return checkSecurityMiddleware(request, async () => {
     try {
-      const isAuthenticated = verifySession()
+      const isAuthenticated = verifySession(request)
       
       if (!isAuthenticated) {
         return NextResponse.json(

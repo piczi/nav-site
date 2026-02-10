@@ -161,93 +161,69 @@ export function CategoriesManagement() {
           </div>
         </div>
 
-        {/* Categories Table */}
+        {/* Categories List */}
         {filteredCategories.length > 0 ? (
-          <div className="border rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="text-left p-4 font-medium">排序</th>
-                  <th className="text-left p-4 font-medium">分类</th>
-                  <th className="text-left p-4 font-medium">标识</th>
-                  <th className="text-left p-4 font-medium">网站数</th>
-                  <th className="text-left p-4 font-medium">状态</th>
-                  <th className="text-left p-4 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {filteredCategories.map((category) => (
-                  <tr key={category.id} className="hover:bg-muted/50">
-                    <td className="p-4">
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleMoveSort(category.id, "up")}
-                          disabled={categories.findIndex(c => c.id === category.id) === 0}
-                        >
-                          <ArrowUpDown className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
-                          style={{ 
-                            backgroundColor: `${category.color}20` || '#3b82f620',
-                            color: category.color || '#3b82f6'
-                          }}
-                        >
-                          {category.icon || category.name.charAt(0)}
-                        </div>
-                        <div>
-                          <h4 className="font-medium">{category.name}</h4>
-                          {category.description && (
-                            <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                              {category.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <code className="text-sm bg-muted px-2 py-1 rounded">
-                        {category.slug}
-                      </code>
-                    </td>
-                    <td className="p-4">
-                      <span className="text-sm">{category._count?.websites || 0}</span>
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        category.isShow 
-                          ? "bg-green-100 text-green-700" 
-                          : "bg-gray-100 text-gray-700"
-                      }`}>
-                        {category.isShow ? "显示" : "隐藏"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Link href={`/admin/categories/${category.id}/edit`}>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(category.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredCategories.map((category) => (
+              <div key={category.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
+                      style={{
+                        backgroundColor: `${category.color}20` || '#3b82f620',
+                        color: category.color || '#3b82f6'
+                      }}
+                    >
+                      {category.icon || category.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-medium truncate">{category.name}</h4>
+                      <code className="text-xs text-muted-foreground">{category.slug}</code>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleMoveSort(category.id, "up")}
+                      disabled={categories.findIndex(c => c.id === category.id) === 0}
+                    >
+                      <ArrowUpDown className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    category.isShow
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}>
+                    {category.isShow ? "显示" : "隐藏"}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {category._count?.websites || 0} 个网站
+                  </span>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <Link href={`/admin/categories/${category.id}/edit`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Edit className="h-3 w-3 mr-1" />
+                      编辑
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    onClick={() => handleDelete(category.id)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="text-center py-16">

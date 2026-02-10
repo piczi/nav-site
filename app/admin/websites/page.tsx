@@ -161,92 +161,76 @@ export default function WebsitesPage() {
           </div>
         </div>
 
-        {/* Websites Table */}
+        {/* Websites List */}
         {paginatedWebsites.length > 0 ? (
           <>
-            <div className="border rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="text-left p-4 font-medium">网站</th>
-                    <th className="text-left p-4 font-medium">分类</th>
-                    <th className="text-left p-4 font-medium">点击量</th>
-                    <th className="text-left p-4 font-medium">状态</th>
-                    <th className="text-left p-4 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {paginatedWebsites.map((website) => (
-                    <tr key={website.id} className="hover:bg-muted/50">
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <WebsiteIcon url={website.url} title={website.title} icon={website.icon} size="lg" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">{website.title}</h4>
-                            <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                              {website.url}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-1 rounded-full bg-muted text-sm">
-                          {website.category.name}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <span className="text-sm">{website.clickCount.toLocaleString()}</span>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          {website.isFeatured && (
-                            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                          )}
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            website.isShow 
-                              ? "bg-green-100 text-green-700" 
-                              : "bg-gray-100 text-gray-700"
-                          }`}>
-                            {website.isShow ? "显示" : "隐藏"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleToggleFeatured(website.id, website.isFeatured)}
-                          >
-                            <Star className={`h-4 w-4 ${website.isFeatured ? "fill-yellow-500 text-yellow-500" : ""}`} />
-                          </Button>
-                          <Link href={`/admin/websites/${website.id}/edit`}>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(website.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.open(website.url, "_blank")}
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {paginatedWebsites.map((website) => (
+                <div key={website.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <WebsiteIcon url={website.url} title={website.title} icon={website.icon} size="lg" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-medium truncate">{website.title}</h4>
+                      <p className="text-sm text-muted-foreground truncate">{website.url}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="px-2 py-1 rounded-full bg-muted text-xs">
+                      {website.category.name}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {website.clickCount.toLocaleString()} 次点击
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      {website.isFeatured && (
+                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                      )}
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        website.isShow
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}>
+                        {website.isShow ? "显示" : "隐藏"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleToggleFeatured(website.id, website.isFeatured)}
+                    >
+                      <Star className={`h-3 w-3 mr-1 ${website.isFeatured ? "fill-yellow-500 text-yellow-500" : ""}`} />
+                      {website.isFeatured ? "取消推荐" : "推荐"}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => window.open(website.url, "_blank")}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                    <Link href={`/admin/websites/${website.id}/edit`}>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      onClick={() => handleDelete(website.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Pagination */}
